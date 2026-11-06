@@ -3,9 +3,36 @@ open Model
 
 type result = { satisfying : IntSet.t; holds_initially : bool; witness : int list option; counterexample : int list option }
 
+let find_path model starts targets allowed =
+  let rec seed queue parents visited = function
+    | [] -> (queue, parents, visited)
+    | id::rest when IntSet.mem id allowed ->
+      if IntSet.mem id visited then seed queue parents visited rest
+      else seed (queue @ [id]) (IntMap.add id (-1) parents) (IntSet.add id visited) rest
+    | _::rest -> seed queue parents visited rest
+  in
+  let queue, parents, visited = seed [] IntMap.empty IntSet.empty (IntSet.elements starts) in
+  let rec search queue parents visited =
+    match queue with
+    | [] -> None
+    | id::rest when IntSet.mem id targets ->
+      let rec rebuild current acc =
+        match IntMap.find_opt current parents with
+        | None -> acc
+        | Some (-1) -> current::acc
+        | Some parent -> rebuild parent (current::acc)
+      in Some (rebuild id [])
+    | id::rest ->
+      let successors = match state model id with Some s -> s.successors | None -> IntSet.empty in
+      let fresh = IntSet.diff (IntSet.inter successors allowed) visited |> IntSet.elements in
+      let parents' = List.fold_left (fun map next -> IntMap.add next id map) parents fresh in
+      let visited' = List.fold_left (fun set next -> IntSet.add next set) visited fresh in
+      search (rest @ fresh) parents' visited'
+  in
+  search queue parents visited
+
 let evaluate model formula =
   let universe = all_states model in
-  let get id = match state model id with Some s -> s | None -> failwith "invalid state reference" in
   let pre_exists set =
     IntMap.fold (fun id s acc ->
       if not (IntSet.is_empty (IntSet.inter s.successors set))
@@ -50,6 +77,15 @@ let evaluate model formula =
   in
   let satisfying = eval formula in
   let holds_initially = IntSet.subset model.initial satisfying in
-  { satisfying; holds_initially; witness = None; counterexample = None }
+  let witness, counterexample = match formula with
+    | EF p ->
+      (find_path model model.initial (eval p) universe, None)
+    | EU (a,b) ->
+      (find_path model model.initial (eval b) (IntSet.union (eval a) (eval b)), None)
+    | AG p ->
+      (None, find_path model model.initial (IntSet.diff universe (eval p)) universe)
+    | _ -> (None, None)
+  in
+  { satisfying; holds_initially; witness; counterexample }
 
 let state_list set = IntSet.elements set
