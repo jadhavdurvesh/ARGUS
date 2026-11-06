@@ -1,8 +1,15 @@
 let read_file path =
   let channel = open_in path in
   Fun.protect ~finally:(fun () -> close_in channel) (fun () ->
-    let length = in_channel_length channel in
-    really_input_string channel length)
+    really_input_string channel (in_channel_length channel))
+
+let split_arrow words =
+  let rec loop labels = function
+    | [] -> (List.rev labels, [])
+    | "->"::successors -> (List.rev labels, successors)
+    | word::rest -> loop (word::labels) rest
+  in
+  loop [] words
 
 let () =
   let usage () =
@@ -19,18 +26,19 @@ let () =
       let line = String.trim line in
       if line <> "" && line.[0] <> '#' then
         match String.split_on_char ' ' line |> List.filter ((<>) "") with
-        | "initial"::id::_ -> initials := int_of_string id :: !initials
+        | ["initial"; id] -> initials := int_of_string id :: !initials
         | "state"::id::rest ->
           let id = int_of_string id in
-          let before, after =
-            match List.partition ((<>) "->") rest with
-            | labels, _ -> labels, (try let rec drop = function [] -> [] | "->"::xs -> xs | _::xs -> drop xs in drop rest with _ -> [])
-          in
-          let successors = List.map int_of_string after in
-          states := Model.make_state ~labels:before id successors :: !states
+          let labels, successors = split_arrow rest in
+          let successors = List.map int_of_string successors in
+          states := Model.make_state ~labels id successors :: !states
         | _ -> failwith ("invalid model line: " ^ line)
     ) lines;
-    let model = Model.create ~states:!states ~initial:(List.fold_left (fun s x -> Model.IntSet.add x s) Model.IntSet.empty !initials) in
+    let initial_set =
+      List.fold_left (fun set id -> Model.IntSet.add id set)
+        Model.IntSet.empty !initials
+    in
+    let model = Model.create ~states:!states ~initial:initial_set in
     let formula = Parser.parse Sys.argv.(2) in
     let result = Checker.evaluate model formula in
     Printf.printf "Formula: %s\n" (Formula.to_string formula);
