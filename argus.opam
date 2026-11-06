@@ -1,0 +1,14 @@
+opam-version: "2.0"
+name: "argus"
+version: "0.1.0"
+synopsis: "Explicit-state model checker and temporal logic engine"
+maintainer: "Durvesh Jadhav"
+authors: ["Durvesh Jadhav"]
+license: "MIT"
+depends: [
+  "ocaml" {>= "4.14"}
+  "dune" {>= "3.11"}
+]
+build: [
+  ["dune" "build" "-p" name "-j" jobs]
+]
