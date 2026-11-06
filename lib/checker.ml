@@ -15,7 +15,7 @@ let find_path model starts targets allowed =
   let rec search queue parents visited =
     match queue with
     | [] -> None
-    | id::rest when IntSet.mem id targets ->
+    | id::_ when IntSet.mem id targets ->
       let rec rebuild current acc =
         match IntMap.find_opt current parents with
         | None -> acc
