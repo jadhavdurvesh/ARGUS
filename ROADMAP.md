@@ -21,8 +21,9 @@
 - [x] Command-line model checker
 - [x] Regression tests for CTL operators
 - [x] CI build and test workflow
-- [ ] Witness path extraction
-- [ ] Counterexample traces
+- [x] Shortest witness paths for EF and EU
+- [x] Counterexample prefixes for AG
+- [ ] Full infinite lasso traces for EG/AF/AG
 - [ ] Source locations in formula diagnostics
 - [ ] Property-based graph generation
 
