@@ -38,7 +38,7 @@ let parse source =
     else raise (Parse_error "unexpected token") in
   let rec implication () =
     let left = disjunction () in
-    if peek () = Implies then (ignore (take ()); Implies (left, implication ())) else left
+    if peek () = Implies then (ignore (take ()); Formula.Implies (left, implication ())) else left
   and disjunction () =
     let rec loop left = if peek () = Or then (ignore (take ()); loop (Formula.Or (left, conjunction ()))) else left in
     loop (conjunction ())
