@@ -24,3 +24,10 @@ let () =
   check "parser" (AG (Implies (Atom "ready", EF (Atom "safe"))))
     (Parser.parse "AG (ready -> EF safe)");
   print_endline "ARGUS tests passed"
+
+let () =
+  let open Formula in
+  let reach = Checker.evaluate model (EF (Atom "safe")) in
+  check "EF witness path" (Some [0;1]) reach.witness;
+  let safety = Checker.evaluate model (AG (Atom "safe")) in
+  check "AG counterexample prefix" (Some [0;2]) safety.counterexample
