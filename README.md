@@ -13,6 +13,8 @@ ARGUS models finite transition systems and evaluates Computation Tree Logic (CTL
 - CTL operators: EX, AX, EF, AF, EG, AG, EU and AU
 - Least and greatest fixed-point evaluation
 - Satisfying-state sets and initial-state verdict
+- Shortest BFS witness paths for EF and EU
+- BFS counterexample prefixes for failed AG properties
 - Formula parser and model-file CLI
 - Dune build, tests and GitHub Actions CI
 
