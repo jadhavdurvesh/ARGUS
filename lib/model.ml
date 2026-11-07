@@ -23,7 +23,7 @@ let create ?(require_total=false) ~states ~initial =
     if not (known id) then invalid_arg ("unknown initial state " ^ string_of_int id))
     initial;
   let model = { states = table; initial } in
-  if require_total then
+  if require_total then (
     let deadlocks =
       IntMap.fold (fun id s acc ->
         if IntSet.is_empty s.successors then id :: acc else acc)
@@ -32,7 +32,8 @@ let create ?(require_total=false) ~states ~initial =
     in
     if deadlocks <> [] then
       let ids = List.map string_of_int deadlocks in
-      invalid_arg ("model contains deadlock states: " ^ String.concat ", " ids);
+      invalid_arg ("model contains deadlock states: " ^ String.concat ", " ids)
+  );
   model
 
 let state model id = IntMap.find_opt id model.states
