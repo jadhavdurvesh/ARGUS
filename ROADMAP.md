@@ -40,3 +40,5 @@
 - [x] Opt-in strict total-transition-system validation
 - [x] Explicit deadlock self-loop totalization
 - [x] CLI controls for strict and totalized deadlock policies
+
+- [x] Regression models for manual-mode precedence and critical-thermal movement invariant counterexamples
