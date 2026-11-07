@@ -1,4 +1,5 @@
 (library
  (name argus)
  (public_name argus)
+ (wrapped false)
  (modules formula model parser checker))
