@@ -69,7 +69,7 @@ let () =
   in
   check "manual mode remains manual in every successor" true precedence.holds_initially;
   let unsafe_model = Model.create
-    ~states:[state 30 ["critical_thermal"] [31]; state 31 ["moving"] [31]]
+    ~states:[state 30 ["idle"] [31]; state 31 ["critical_thermal"; "moving"] [31]]
     ~initial:(Model.IntSet.singleton 30)
   in
   let blocked = Checker.evaluate unsafe_model
