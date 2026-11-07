@@ -54,3 +54,26 @@ let () =
       String.length message > 0
   in
   check "strict totality rejects deadlock" true rejected
+
+let () =
+  let open Formula in
+  let manual_model = Model.create
+    ~states:[
+      state 20 ["manual"] [21];
+      state 21 ["manual"] [21]
+    ]
+    ~initial:(Model.IntSet.singleton 20)
+  in
+  let precedence = Checker.evaluate manual_model
+    (AG (Implies (Atom "manual", AX (Atom "manual"))))
+  in
+  check "manual mode remains manual in every successor" true precedence.holds_initially;
+  let unsafe_model = Model.create
+    ~states:[state 30 ["critical_thermal"] [31]; state 31 ["moving"] [31]]
+    ~initial:(Model.IntSet.singleton 30)
+  in
+  let blocked = Checker.evaluate unsafe_model
+    (AG (Implies (Atom "critical_thermal", AX (Not (Atom "moving")))))
+  in
+  check "thermal movement invariant exposes counterexample" false blocked.holds_initially;
+  check "thermal invariant counterexample path" (Some [30;31]) blocked.counterexample
