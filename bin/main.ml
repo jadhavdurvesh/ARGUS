@@ -22,7 +22,7 @@ let () =
   let option, model_path, formula_text =
     match Array.to_list Sys.argv |> List.tl with
     | [path; formula] -> (None, path, formula)
-    | [("--require-total" | "--totalize-deadlocks" as opt); path; formula] ->
+    | [ (("--require-total" | "--totalize-deadlocks") as opt); path; formula] ->
         (Some opt, path, formula)
     | _ -> usage ()
   in
