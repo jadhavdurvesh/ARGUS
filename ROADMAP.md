@@ -35,3 +35,8 @@
 - [ ] LTL-to-Buchi automata pipeline
 - [ ] State-space reduction and symmetry
 - [ ] Symbolic BDD backend
+
+- [x] Explicit deadlock-state detection
+- [x] Opt-in strict total-transition-system validation
+- [x] Explicit deadlock self-loop totalization
+- [x] CLI controls for strict and totalized deadlock policies
