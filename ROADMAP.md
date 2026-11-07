@@ -42,3 +42,5 @@
 - [x] CLI controls for strict and totalized deadlock policies
 
 - [x] Regression models for manual-mode precedence and critical-thermal movement invariant counterexamples
+
+- [x] Replace list-concatenation BFS with a constant-time queue for shortest witness/counterexample paths
