@@ -31,3 +31,26 @@ let () =
   check "EF witness path" (Some [0;1]) reach.witness;
   let safety = Checker.evaluate model (AG (Atom "safe")) in
   check "AG counterexample prefix" (Some [0;2]) safety.counterexample
+
+
+let () =
+  let open Model in
+  let partial = Model.create
+    ~states:[state 10 ["start"] [11]; state 11 ["finish"] []]
+    ~initial:(IntSet.singleton 10)
+  in
+  check "deadlock detection" (IntSet.singleton 11) (deadlocks partial);
+  check "non-total model accepted by default" false (is_total partial);
+  let totalized = with_deadlock_self_loops partial in
+  check "explicit self-loop totalization" true (is_total totalized);
+  check "totalization preserves state IDs" (ids partial) (ids totalized);
+  let rejected =
+    try
+      ignore (Model.create ~require_total:true
+        ~states:[state 0 ["terminal"] []]
+        ~initial:(IntSet.singleton 0));
+      false
+    with Invalid_argument message ->
+      String.length message > 0
+  in
+  check "strict totality rejects deadlock" true rejected
