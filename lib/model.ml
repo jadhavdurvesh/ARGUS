@@ -33,3 +33,23 @@ let predecessors model =
       let old = match IntMap.find_opt target map with Some x -> x | None -> IntSet.empty in
       IntMap.add target (IntSet.add id old) map) s.successors acc)
     model.states IntMap.empty
+
+let deadlocks model =
+  IntMap.fold (fun id s acc ->
+    if IntSet.is_empty s.successors then IntSet.add id acc else acc)
+    model.states IntSet.empty
+
+let is_total model = IntSet.is_empty (deadlocks model)
+
+(** Return a new model in which each deadlock state has an explicit self-loop.
+    This is an opt-in transformation: callers must choose it deliberately
+    because it changes the transition relation and therefore temporal results. *)
+let with_deadlock_self_loops model =
+  let states =
+    IntMap.bindings model.states
+    |> List.map (fun (id, s) ->
+         if IntSet.is_empty s.successors then
+           { s with successors = IntSet.singleton id }
+         else s)
+  in
+  create ~states ~initial:model.initial
