@@ -1,3 +1,5 @@
+[@@@warning "-16"]
+
 module IntSet = Set.Make (Int)
 module StringSet = Set.Make (String)
 module IntMap = Map.Make (Int)
