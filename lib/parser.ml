@@ -1,5 +1,3 @@
-open Formula
-
 type token = Ident of string | LParen | RParen | Not | And | Or | Implies | EX | AX | EF | AF | EG | AG | EU | AU | True | False | End
 exception Parse_error of string
 
