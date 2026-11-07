@@ -73,7 +73,7 @@ let () =
     ~initial:(Model.IntSet.singleton 30)
   in
   let blocked = Checker.evaluate unsafe_model
-    (AG (Implies (Atom "critical_thermal", AX (Not (Atom "moving")))))
+    (AG (Not (And (Atom "critical_thermal", Atom "moving"))))
   in
   check "thermal movement invariant exposes counterexample" false blocked.holds_initially;
   check "thermal invariant counterexample path" (Some [30;31]) blocked.counterexample
