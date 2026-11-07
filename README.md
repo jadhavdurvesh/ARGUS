@@ -75,3 +75,6 @@ See ROADMAP.md and docs/semantics.md.
 MIT.
 
 Shortest witness and counterexample path search uses a FIFO queue with parent tracking, avoiding repeated list concatenation as the state graph grows.
+
+The current trace extractor returns shortest finite prefixes for EF/EU witnesses and AG counterexamples. It does not yet return lasso-shaped infinite-path witnesses for EG/AF failures, nor does it implement fairness constraints.
+
