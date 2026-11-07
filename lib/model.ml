@@ -9,7 +9,7 @@ let make_state ?(labels=[]) id successors =
   { id; labels = List.fold_left (fun acc x -> StringSet.add x acc) StringSet.empty labels;
     successors = List.fold_left (fun acc x -> IntSet.add x acc) IntSet.empty successors }
 
-let create ~states ~initial =
+let create ?(require_total=false) ~states ~initial =
   let table = List.fold_left (fun acc s ->
     if IntMap.mem s.id acc then invalid_arg ("duplicate state id " ^ string_of_int s.id);
     IntMap.add s.id s acc) IntMap.empty states in
@@ -22,7 +22,11 @@ let create ~states ~initial =
   IntSet.iter (fun id ->
     if not (known id) then invalid_arg ("unknown initial state " ^ string_of_int id))
     initial;
-  { states = table; initial }
+  let model = { states = table; initial } in
+  if require_total && not (is_total model) then
+    let ids = IntSet.elements (deadlocks model) |> List.map string_of_int in
+    invalid_arg ("model contains deadlock states: " ^ String.concat ", " ids);
+  model
 
 let state model id = IntMap.find_opt id model.states
 let ids model = IntMap.fold (fun id _ acc -> IntSet.add id acc) model.states IntSet.empty
