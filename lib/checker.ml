@@ -4,32 +4,46 @@ open Model
 type result = { satisfying : IntSet.t; holds_initially : bool; witness : int list option; counterexample : int list option }
 
 let find_path model starts targets allowed =
-  let rec seed queue parents visited = function
-    | [] -> (queue, parents, visited)
-    | id::rest when IntSet.mem id allowed ->
-      if IntSet.mem id visited then seed queue parents visited rest
-      else seed (queue @ [id]) (IntMap.add id (-1) parents) (IntSet.add id visited) rest
-    | _::rest -> seed queue parents visited rest
+  let frontier = Queue.create () in
+  let parents = ref IntMap.empty in
+  let visited = ref IntSet.empty in
+  IntSet.iter (fun id ->
+    if IntSet.mem id allowed && not (IntSet.mem id !visited) then (
+      visited := IntSet.add id !visited;
+      parents := IntMap.add id (-1) !parents;
+      Queue.add id frontier
+    )
+  ) starts;
+  let rebuild target =
+    let rec loop current acc =
+      match IntMap.find_opt current !parents with
+      | None -> acc
+      | Some (-1) -> current :: acc
+      | Some parent -> loop parent (current :: acc)
+    in
+    loop target []
   in
-  let queue, parents, visited = seed [] IntMap.empty IntSet.empty (IntSet.elements starts) in
-  let rec search queue parents visited =
-    match queue with
-    | [] -> None
-    | id::_ when IntSet.mem id targets ->
-      let rec rebuild current acc =
-        match IntMap.find_opt current parents with
-        | None -> acc
-        | Some (-1) -> current::acc
-        | Some parent -> rebuild parent (current::acc)
-      in Some (rebuild id [])
-    | id::rest ->
-      let successors = match state model id with Some s -> s.successors | None -> IntSet.empty in
-      let fresh = IntSet.diff (IntSet.inter successors allowed) visited |> IntSet.elements in
-      let parents' = List.fold_left (fun map next -> IntMap.add next id map) parents fresh in
-      let visited' = List.fold_left (fun set next -> IntSet.add next set) visited fresh in
-      search (rest @ fresh) parents' visited'
+  let rec search () =
+    if Queue.is_empty frontier then None
+    else
+      let id = Queue.take frontier in
+      if IntSet.mem id targets then Some (rebuild id)
+      else
+        let successors =
+          match state model id with
+          | Some s -> IntSet.inter s.successors allowed
+          | None -> IntSet.empty
+        in
+        IntSet.iter (fun next ->
+          if not (IntSet.mem next !visited) then (
+            visited := IntSet.add next !visited;
+            parents := IntMap.add next id !parents;
+            Queue.add next frontier
+          )
+        ) successors;
+        search ()
   in
-  search queue parents visited
+  search ()
 
 let evaluate model formula =
   let universe = all_states model in
