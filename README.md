@@ -73,3 +73,5 @@ See ROADMAP.md and docs/semantics.md.
 ## License
 
 MIT.
+
+Shortest witness and counterexample path search uses a FIFO queue with parent tracking, avoiding repeated list concatenation as the state graph grows.
