@@ -13,13 +13,21 @@ let split_arrow words =
 
 let () =
   let usage () =
-    prerr_endline "Usage: argus <model-file> <formula>";
+    prerr_endline "Usage: argus [--require-total | --totalize-deadlocks] <model-file> <formula>";
+    prerr_endline "  --require-total       reject models containing states with no successors";
+    prerr_endline "  --totalize-deadlocks  add explicit self-loops to deadlock states";
     prerr_endline "Model format: state <id> [label ...] -> <successor-id> ...";
     exit 2
   in
-  if Array.length Sys.argv <> 3 then usage ();
+  let option, model_path, formula_text =
+    match Array.to_list Sys.argv |> List.tl with
+    | [path; formula] -> (None, path, formula)
+    | [("--require-total" | "--totalize-deadlocks" as opt); path; formula] ->
+        (Some opt, path, formula)
+    | _ -> usage ()
+  in
   try
-    let source = read_file Sys.argv.(1) in
+    let source = read_file model_path in
     let lines = String.split_on_char '\n' source in
     let states = ref [] and initials = ref [] in
     List.iter (fun line ->
@@ -38,8 +46,15 @@ let () =
       List.fold_left (fun set id -> Model.IntSet.add id set)
         Model.IntSet.empty !initials
     in
-    let model = Model.create ~states:!states ~initial:initial_set in
-    let formula = Parser.parse Sys.argv.(2) in
+    let model = Model.create
+      ~require_total:(option = Some "--require-total")
+      ~states:!states ~initial:initial_set in
+    let model =
+      if option = Some "--totalize-deadlocks"
+      then Model.with_deadlock_self_loops model
+      else model
+    in
+    let formula = Parser.parse formula_text in
     let result = Checker.evaluate model formula in
     Printf.printf "Formula: %s\n" (Formula.to_string formula);
     Printf.printf "Satisfying states: {%s}\n"
