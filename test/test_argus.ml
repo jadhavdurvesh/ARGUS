@@ -1,5 +1,5 @@
 let state id labels successors = Model.make_state ~labels id successors
-let model = Model.create
+let model = Model.create ~require_total:false
   ~states:[
     state 0 ["ready"] [1;2];
     state 1 ["safe"] [1];
@@ -35,7 +35,7 @@ let () =
 
 let () =
   let open Model in
-  let partial = Model.create
+  let partial = Model.create ~require_total:false
     ~states:[state 10 ["start"] [11]; state 11 ["finish"] []]
     ~initial:(IntSet.singleton 10)
   in
@@ -57,7 +57,7 @@ let () =
 
 let () =
   let open Formula in
-  let manual_model = Model.create
+  let manual_model = Model.create ~require_total:false
     ~states:[
       state 20 ["manual"] [21];
       state 21 ["manual"] [21]
@@ -68,7 +68,7 @@ let () =
     (AG (Implies (Atom "manual", AX (Atom "manual"))))
   in
   check "manual mode remains manual in every successor" true precedence.holds_initially;
-  let unsafe_model = Model.create
+  let unsafe_model = Model.create ~require_total:false
     ~states:[state 30 ["idle"] [31]; state 31 ["critical_thermal"; "moving"] [31]]
     ~initial:(Model.IntSet.singleton 30)
   in
