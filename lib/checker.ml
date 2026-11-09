@@ -82,7 +82,7 @@ let evaluate model formula =
     let rec loop current =
       let next = IntSet.inter seed (predecessor current) in
       if IntSet.equal current next then current else loop next
-    in loop universe
+    in loop seed
   and until allowed target predecessor =
     let rec loop current =
       let next = IntSet.union target (IntSet.inter allowed (predecessor current)) in
