@@ -1,9 +1,9 @@
-let state id labels successors = Model.make_state ~labels id successors
+let mk_state id labels successors = Model.make_state ~labels id successors
 let model = Model.create ~require_total:false
   ~states:[
-    state 0 ["ready"] [1;2];
-    state 1 ["safe"] [1];
-    state 2 ["unsafe"] [2]
+    mk_state 0 ["ready"] [1;2];
+    mk_state 1 ["safe"] [1];
+    mk_state 2 ["unsafe"] [2]
   ]
   ~initial:(Model.IntSet.singleton 0)
 
@@ -36,7 +36,7 @@ let () =
 let () =
   let open Model in
   let partial = Model.create ~require_total:false
-    ~states:[state 10 ["start"] [11]; state 11 ["finish"] []]
+    ~states:[mk_state 10 ["start"] [11]; mk_state 11 ["finish"] []]
     ~initial:(IntSet.singleton 10)
   in
   check "deadlock detection" (IntSet.singleton 11) (deadlocks partial);
@@ -47,7 +47,7 @@ let () =
   let rejected =
     try
       ignore (Model.create ~require_total:true
-        ~states:[state 0 ["terminal"] []]
+        ~states:[mk_state 0 ["terminal"] []]
         ~initial:(IntSet.singleton 0));
       false
     with Invalid_argument message ->
@@ -59,8 +59,8 @@ let () =
   let open Formula in
   let manual_model = Model.create ~require_total:false
     ~states:[
-      state 20 ["manual"] [21];
-      state 21 ["manual"] [21]
+      mk_state 20 ["manual"] [21];
+      mk_state 21 ["manual"] [21]
     ]
     ~initial:(Model.IntSet.singleton 20)
   in
@@ -69,7 +69,7 @@ let () =
   in
   check "manual mode remains manual in every successor" true precedence.holds_initially;
   let unsafe_model = Model.create ~require_total:false
-    ~states:[state 30 ["idle"] [31]; state 31 ["critical_thermal"; "moving"] [31]]
+    ~states:[mk_state 30 ["idle"] [31]; mk_state 31 ["critical_thermal"; "moving"] [31]]
     ~initial:(Model.IntSet.singleton 30)
   in
   let blocked = Checker.evaluate unsafe_model
