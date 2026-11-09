@@ -18,7 +18,7 @@ let () =
   check "EX" (IntSet.of_list [0;1]) (evaluate (EX (Atom "safe")));
   check "AX" (IntSet.singleton 1) (evaluate (AX (Atom "safe")));
   check "EF" (IntSet.of_list [0;1]) (evaluate (EF (Atom "safe")));
-  check "AG safe" IntSet.empty (evaluate (AG (Atom "safe")));
+  check "AG safe" (IntSet.singleton 1) (evaluate (AG (Atom "safe")));
   check "EG safe" (IntSet.singleton 1) (evaluate (EG (Atom "safe")));
   check "existential until" (IntSet.of_list [0;1]) (evaluate (EU (Atom "ready",Atom "safe")));
   check "parser" (AG (Implies (Atom "ready", EF (Atom "safe"))))
