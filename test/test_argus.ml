@@ -15,8 +15,8 @@ let () =
   let open Model in
   let evaluate f = (Checker.evaluate model f).satisfying in
   check "atom" (IntSet.singleton 1) (evaluate (Atom "safe"));
-  check "EX" (IntSet.singleton 0) (evaluate (EX (Atom "safe")));
-  check "AX" IntSet.empty (evaluate (AX (Atom "safe")));
+  check "EX" (IntSet.of_list [0;1]) (evaluate (EX (Atom "safe")));
+  check "AX" (IntSet.singleton 1) (evaluate (AX (Atom "safe")));
   check "EF" (IntSet.of_list [0;1]) (evaluate (EF (Atom "safe")));
   check "AG safe" IntSet.empty (evaluate (AG (Atom "safe")));
   check "EG safe" (IntSet.singleton 1) (evaluate (EG (Atom "safe")));
