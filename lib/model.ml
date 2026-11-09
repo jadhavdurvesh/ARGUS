@@ -11,7 +11,7 @@ let make_state ?(labels=[]) id successors =
   { id; labels = List.fold_left (fun acc x -> StringSet.add x acc) StringSet.empty labels;
     successors = List.fold_left (fun acc x -> IntSet.add x acc) IntSet.empty successors }
 
-let create ?(require_total=false) ~states ~initial =
+let create ~require_total ~states ~initial =
   let table = List.fold_left (fun acc s ->
     if IntMap.mem s.id acc then invalid_arg ("duplicate state id " ^ string_of_int s.id);
     IntMap.add s.id s acc) IntMap.empty states in
@@ -66,4 +66,4 @@ let with_deadlock_self_loops model =
            { s with successors = IntSet.singleton id }
          else s)
   in
-  create ~states ~initial:model.initial
+  create ~require_total:false ~states ~initial:model.initial
